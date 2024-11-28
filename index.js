@@ -1,17 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
 
 app.use(express.json())
 app.use(cors());
-
-console.log(process.env.DB_USER)
-console.log(process.env.DB_PASS)
-
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tlbvp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -24,6 +20,8 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+const database = client.db('Coffeshop')
+const coffeList = database.collection('coffeList')
 
 async function run() {
   try {
@@ -34,15 +32,28 @@ async function run() {
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
 
 
 
-app.get('/', (req, res) => {
-    res.send('Coffe shop is running')
+app.get('/coffees', async(req, res) => {
+  const data = await coffeList.find().toArray()
+    res.send(data);
+})
+
+app.post('/coffees',async(req, res) => {
+  const data = req.body;
+  const result =await coffeList.insertOne(data);
+  console.log(`Succesfully added to database ${data.name}`)
+})
+
+app.delete('/coffees/:id',async(req, res) => {
+  const id = req.params.id;
+  const result = await coffeList.deleteOne({_id: new ObjectId(id)})
+  console.log('deleted',id)
 })
 
 app.listen(port, () => {
