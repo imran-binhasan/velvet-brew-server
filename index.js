@@ -47,13 +47,15 @@ app.get('/coffees', async(req, res) => {
 app.post('/coffees',async(req, res) => {
   const data = req.body;
   const result =await coffeList.insertOne(data);
-  console.log(`Succesfully added to database ${data.name}`)
+  console.log('Updated',data)
+  console.log(result)
 })
 
 app.delete('/coffees/:id',async(req, res) => {
   const id = req.params.id;
-  const result = await coffeList.deleteOne({_id: new ObjectId(id)})
-  console.log('deleted',id)
+  const query = {_id: new ObjectId(id)}
+  const result = await coffeList.deleteOne(query)
+  console.log(result)
 })
 
 app.listen(port, () => {
