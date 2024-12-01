@@ -34,11 +34,11 @@ async function run() {
 
     
 app.get('/coffees', async(req, res) => {
-  const data = await coffeList.find().toArray()
-    res.send(data);
+  const query = await coffeList.find().toArray()
+    res.send(query);
 })
 
-app.get('/coffee/:id', async (req, res) => {
+app.get('/coffees/:id', async (req, res) => {
   const id = req.params.id;
   const query = await coffeList.findOne({_id: new ObjectId(id)});
   res.send(query)
@@ -46,17 +46,38 @@ app.get('/coffee/:id', async (req, res) => {
 
 app.get('/updateCoffee/:id', async (req, res) => {
   const id = req.params.id
-  const data = await coffeList.find({_id: new ObjectId(id)})
-  console.log(data)
-  res.send(data)
+  const query = await coffeList.findOne({_id: new ObjectId(id)})
+  console.log(query)
+  res.send(query)
 })
 
 app.post('/coffees',async(req, res) => {
   const data = req.body;
-  const result =await coffeList.insertOne(data);
+  const result = await coffeList.insertOne(data);
   res.send(result);
   console.log('Updated',data)
   console.log(result);
+})
+
+app.put('/coffees/:id',async (req, res)=> {
+  const id = req.params.id;
+  const data = req.body;
+  const query = {_id: new ObjectId(id)}
+  const options = {upsert: true}
+  console.log(query,data)
+  const updatedData = {
+    $set:{
+      name: data.name,
+      chef: data.chef,
+      category: data.category,
+      price: data.price,
+      taste: data.taste,
+      supplier: data.supplier,
+      photoURL: data.photoURL
+    }
+  }
+  const result = await coffeList.updateOne(query,updatedData,options)
+  res.send(result)
 })
 
 app.delete('/coffees/:id',async(req, res) => {
