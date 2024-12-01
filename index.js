@@ -27,9 +27,46 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    
+app.get('/coffees', async(req, res) => {
+  const data = await coffeList.find().toArray()
+    res.send(data);
+})
+
+app.get('/coffee/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = await coffeList.findOne({_id: new ObjectId(id)});
+  res.send(query)
+})
+
+app.get('/updateCoffee/:id', async (req, res) => {
+  const id = req.params.id
+  const data = await coffeList.find({_id: new ObjectId(id)})
+  console.log(data)
+  res.send(data)
+})
+
+app.post('/coffees',async(req, res) => {
+  const data = req.body;
+  const result =await coffeList.insertOne(data);
+  res.send(result);
+  console.log('Updated',data)
+  console.log(result);
+})
+
+app.delete('/coffees/:id',async(req, res) => {
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await coffeList.deleteOne(query)
+  res.send(result);
+  console.log(result);
+})
+
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -38,25 +75,6 @@ async function run() {
 run().catch(console.dir);
 
 
-
-app.get('/coffees', async(req, res) => {
-  const data = await coffeList.find().toArray()
-    res.send(data);
-})
-
-app.post('/coffees',async(req, res) => {
-  const data = req.body;
-  const result =await coffeList.insertOne(data);
-  console.log('Updated',data)
-  console.log(result)
-})
-
-app.delete('/coffees/:id',async(req, res) => {
-  const id = req.params.id;
-  const query = {_id: new ObjectId(id)}
-  const result = await coffeList.deleteOne(query)
-  console.log(result)
-})
 
 app.listen(port, () => {
     console.log(`coffe server is running on port : ${port}`)
